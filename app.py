@@ -2,15 +2,16 @@ import streamlit as st
 import psycopg2
 
 # --- Database Connection Function ---
-# This is your existing code and does not need to change.
+# THIS IS THE NEW, CORRECT FUNCTION
 def get_db_connection():
     try:
+        # This function now READS from st.secrets
         conn = psycopg2.connect(
-            host="localhost",
-            database="student_db",       # Your database name
-            user="postgres",             # The default user
-            password="#Shahid@123",      # Your password
-            port="9153"                  # Your custom port
+            host=st.secrets["db_host"],
+            database=st.secrets["db_database"],
+            user=st.secrets["db_user"],
+            password=st.secrets["db_password"],
+            port=int(st.secrets["db_port"])  # Use the port from secrets
         )
         return conn
     except Exception as e:
@@ -270,6 +271,26 @@ st.set_page_config(
 
 # Call the CSS function to apply styles
 load_css()
+
+# --- NEW DEBUGGING CODE ---
+# This will show you which secrets your app is *actually* using.
+st.subheader("--- DEBUGGING INFO (What secrets is the app using?) ---")
+try:
+    st.write(f"Host: {st.secrets['db_host']}")
+    st.write(f"Database: {st.secrets['db_database']}")
+    st.write(f"User: {st.secrets['db_user']}")
+    st.write(f"Port: {st.secrets['db_port']}")
+    
+    if "db_password" in st.secrets:
+        st.write("Password secret: [Loaded Successfully]")
+    else:
+        st.write("Password secret: [!!! NOT FOUND !!!]")
+        
+except KeyError as e:
+    st.error(f"DEBUG: Secrets could not be loaded. Error: {e}")
+st.subheader("--- End of Debug Info ---")
+# --- END OF DEBUGGING CODE ---
+
 
 # --- 1. Header with Logo and Title (Centered) ---
 st.image("AI.webp", width=150) # CSS will center this and apply style
