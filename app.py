@@ -2,16 +2,17 @@ import streamlit as st
 import psycopg2
 
 # --- Database Connection Function ---
-# THIS IS THE NEW, CORRECT FUNCTION
+# THIS IS THE FINAL, CORRECT FUNCTION
 def get_db_connection():
     try:
-        # This function now READS from st.secrets
+        # This function now READS from st.secrets and adds SSL
         conn = psycopg2.connect(
             host=st.secrets["db_host"],
             database=st.secrets["db_database"],
             user=st.secrets["db_user"],
             password=st.secrets["db_password"],
-            port=int(st.secrets["db_port"])  # Use the port from secrets
+            port=int(st.secrets["db_port"]),
+            sslmode="require"  # <-- THIS FIXES THE "insecure connection" ERROR
         )
         return conn
     except Exception as e:
@@ -32,18 +33,7 @@ def load_css():
             font-size: 16px; 
         }
 
-        /* --- Logo Styling --- */
-        [data-testid="stAppViewContainer"] > .main > div > div > div > [data-testid="stImage"] {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            width: 150px; 
-        }
-        [data-testid="stAppViewContainer"] > .main > div > div > div > [data-testid="stImage"] img {
-             border-radius: 50%; 
-             box-shadow: 0 0 20px #5c9dff; 
-             border: 2px solid #5c9dff;   
-        }
+        /* --- Logo Styling (REMOVED) --- */
         
         /* --- Title (Centered) --- */
         .stTitle {
@@ -178,19 +168,16 @@ def load_css():
 
 
         /* --- START: EXPLICIT LIGHT THEME OVERRIDES --- */
-        /* This section fixes the color issue in your screenshot */
         
         body[data-theme="light"] [data-testid="stAppViewContainer"] {
             background: linear-gradient(135deg, #e0e0e0 0%, #f0f0f0 100%); /* Lighter background */
             color: #333333; /* Darker text for readability */
         }
 
-        /* --- NEW: Light mode rule for H3 (as requested) --- */
         body[data-theme="light"] [data-testid="stForm"] h3 {
             color: #013220 !important; /* Dark Green (blakish) */
         }
 
-        /* Other text in light mode */
         body[data-theme="light"] .stTitle,
         body[data-theme="light"] .st-emotion-cache-1jicfab.e115fcil1,
         body[data-theme="light"] .st-emotion-cache-1jicfab,
@@ -224,11 +211,6 @@ def load_css():
         /* --- MEDIA QUERY FOR MOBILE PHONES --- */
         @media (max-width: 768px) {
             
-            /* Make logo smaller */
-            [data-testid="stAppViewContainer"] > .main > div > div > div > [data-testid="stImage"] {
-                width: 120px; 
-            }
-
             /* Make fonts smaller */
             .stTitle {
                 font-size: 2.2rem; 
@@ -272,28 +254,11 @@ st.set_page_config(
 # Call the CSS function to apply styles
 load_css()
 
-# --- NEW DEBUGGING CODE ---
-# This will show you which secrets your app is *actually* using.
-st.subheader("--- DEBUGGING INFO (What secrets is the app using?) ---")
-try:
-    st.write(f"Host: {st.secrets['db_host']}")
-    st.write(f"Database: {st.secrets['db_database']}")
-    st.write(f"User: {st.secrets['db_user']}")
-    st.write(f"Port: {st.secrets['db_port']}")
-    
-    if "db_password" in st.secrets:
-        st.write("Password secret: [Loaded Successfully]")
-    else:
-        st.write("Password secret: [!!! NOT FOUND !!!]")
-        
-except KeyError as e:
-    st.error(f"DEBUG: Secrets could not be loaded. Error: {e}")
-st.subheader("--- End of Debug Info ---")
-# --- END OF DEBUGGING CODE ---
+# --- DEBUGGING CODE IS NOW REMOVED ---
 
 
-# --- 1. Header with Logo and Title (Centered) ---
-st.image("AI.webp", width=150) # CSS will center this and apply style
+# --- 1. Header with Title (Centered) ---
+# st.image("AI.webp", width=150) # Image is removed
 st.title("AI & DS Department 🧠")
 st.subheader("Student Data Entry Portal")
 
